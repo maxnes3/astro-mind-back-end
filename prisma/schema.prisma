@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  password String
+
+  @@map("user")
+}
+
+model Map {
+  id     String   @id @default(uuid())
+  title  String
+  nodes  Node[]
+  edges  Edge[]
+
+  @@map("map")
+}
+
+model Node {
+  id        String @id @default(uuid())
+  nodeId    String
+  title     String
+  position  Position?
+  size      Size?
+  mapId     String @map("map_id")
+  map       Map    @relation(fields: [mapId], references: [id])
+
+  @@map("node")
+}
+
+model Edge {
+  id          String @id @default(uuid())
+  leftNodeId  String @map("left_node_id")
+  rightNodeId String @map("right_node_id")
+  mapId       String @map("map_id")
+  map         Map    @relation(fields: [mapId], references: [id])
+
+  @@map("edge")
+}
+
+model Position {
+  id  String @id @default(uuid())
+  x   Int
+  y   Int
+  nodeId String @unique @map("node_id")
+  node Node  @relation(fields: [nodeId], references: [id])
+
+  @@map("position")
+}
+
+model Size {
+  id     String @id @default(uuid())
+  width  Int
+  height Int
+  nodeId String @unique @map("node_id")
+  node   Node @relation(fields: [nodeId], references: [id])
+
+  @@map("size")
+}
